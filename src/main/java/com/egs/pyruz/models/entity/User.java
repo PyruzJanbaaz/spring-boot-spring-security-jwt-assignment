@@ -1,5 +1,6 @@
 package com.egs.pyruz.models.entity;
 
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,12 @@ public class User {
   @Size(max = 20)
   private String username;
 
+  @Size(max = 50)
+  private String firstName;
+
+  @Size(max = 50)
+  private String LastName;
+
   @NotBlank
   @Size(max = 50)
   @Email
@@ -31,6 +38,11 @@ public class User {
   @NotBlank
   @Size(max = 120)
   private String password;
+
+  @Size(max = 80)
+  private String apiKey;
+
+  private Timestamp createDate =  new Timestamp(System.currentTimeMillis());
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(  name = "user_roles", 
@@ -41,10 +53,11 @@ public class User {
   public User() {
   }
 
-  public User(String username, String email, String password) {
+  public User(String username, String email, String password, String apiKey) {
     this.username = username;
     this.email = email;
     this.password = password;
+    this.apiKey = apiKey;
   }
 
   public Long getId() {
@@ -85,5 +98,33 @@ public class User {
 
   public void setRoles(Set<Role> roles) {
     this.roles = roles;
+  }
+
+  public String getApiKey() {
+    return apiKey;
+  }
+
+  public void setApiKey(String apiKey) {
+    this.apiKey = apiKey;
+  }
+
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return LastName;
+  }
+
+  public void setLastName(String lastName) {
+    LastName = lastName;
+  }
+
+  public Timestamp getCreateDate() {
+    return createDate;
   }
 }
