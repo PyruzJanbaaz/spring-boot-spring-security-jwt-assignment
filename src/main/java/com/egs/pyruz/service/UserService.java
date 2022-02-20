@@ -45,6 +45,10 @@ public class UserService extends BaseService {
         this.encoder = encoder;
     }
 
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
     public JwtDTO authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -78,12 +82,10 @@ public class UserService extends BaseService {
             );
         }
 
-        // Create new user's account
         User user = new User(
                 registerUserRequest.getUsername(),
                 registerUserRequest.getEmail(),
-                encoder.encode(registerUserRequest.getPassword()),
-                UUID.randomUUID().toString()
+                encoder.encode(registerUserRequest.getPassword())
         );
 
         Set<String> inputRoles = registerUserRequest.getRole();
@@ -162,6 +164,10 @@ public class UserService extends BaseService {
             userRepository.save(user);
             return new MessageDTO(applicationProperties.getProperty("application.message.password.changed.successfully"));
         }
+    }
+
+    public User newUser(User user) {
+        return userRepository.save(user);
     }
 
 

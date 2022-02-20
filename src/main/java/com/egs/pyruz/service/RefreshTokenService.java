@@ -40,8 +40,8 @@ public class RefreshTokenService extends BaseService {
                 })
                 .orElseThrow(
                         () -> new ServiceExceptionDTO(
-                                "Refresh token dose not exist!",
-                                HttpStatus.NOT_FOUND
+                                applicationProperties.getProperty("application.message.refresh.token.not.exist"),
+                                HttpStatus.NOT_ACCEPTABLE
                         )
                 );
     }
