@@ -12,6 +12,7 @@ import com.egs.pyruz.models.entity.RefreshToken;
 import com.egs.pyruz.models.entity.Role;
 import com.egs.pyruz.models.entity.User;
 import com.egs.pyruz.models.enums.ERole;
+import com.egs.pyruz.repository.RefreshTokenRepository;
 import com.egs.pyruz.repository.RoleRepository;
 import com.egs.pyruz.repository.UserRepository;
 import com.egs.pyruz.security.JwtUtils;
@@ -26,6 +27,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -34,13 +36,15 @@ public class UserService extends BaseService {
 
     final AuthenticationManager authenticationManager;
     final RoleRepository roleRepository;
+    final RefreshTokenRepository refreshTokenRepository;
     final RefreshTokenService refreshTokenService;
     final PasswordEncoder encoder;
 
-    public UserService(JwtUtils jwtUtils, UserRepository userRepository, ApplicationProperties applicationProperties, AuthenticationManager authenticationManager, RoleRepository roleRepository, RefreshTokenService refreshTokenService, PasswordEncoder encoder) {
+    public UserService(JwtUtils jwtUtils, UserRepository userRepository, ApplicationProperties applicationProperties, AuthenticationManager authenticationManager, RoleRepository roleRepository, RefreshTokenRepository refreshTokenRepository, RefreshTokenService refreshTokenService, PasswordEncoder encoder) {
         super(jwtUtils, userRepository, applicationProperties);
         this.authenticationManager = authenticationManager;
         this.roleRepository = roleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.refreshTokenService = refreshTokenService;
         this.encoder = encoder;
     }
@@ -133,10 +137,19 @@ public class UserService extends BaseService {
         return getCurrentUserById(id);
     }
 
+    @Transactional
     public MessageDTO deleteUser(Long id) {
         User user = getCurrentUserById(id);
-        userRepository.delete(user);
-        return new MessageDTO(applicationProperties.getProperty("application.message.user.deleted.successfully"));
+        if (!user.getUsername().equals("admin")) {
+            refreshTokenRepository.deleteByUser(user);
+            userRepository.delete(user);
+            return new MessageDTO(applicationProperties.getProperty("application.message.user.deleted.successfully"));
+        } else {
+            throw new ServiceExceptionDTO(
+                    applicationProperties.getProperty("application.message.forbidden.operation"),
+                    HttpStatus.BAD_REQUEST
+            );
+        }
     }
 
     public MessageDTO updateUser(UserUpdateRequest userUpdateRequest) {

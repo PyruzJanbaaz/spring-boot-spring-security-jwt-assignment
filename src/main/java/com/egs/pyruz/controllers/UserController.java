@@ -71,7 +71,7 @@ public class UserController {
     @GetMapping("/user")
     @PreAuthorize("hasRole('USER')")
     public String userAccess() {
-        return "This is a secured page and just will loaded for USER role!";
+        return "This page is secured & will loaded for USER role!";
     }
 
     @PutMapping("/v1/user/changePassword")
@@ -83,6 +83,6 @@ public class UserController {
     @GetMapping("/admin")
     @PreAuthorize("hasRole('ADMIN')")
     public String adminAccess() {
-        return "This is a secured page and just will loaded for ADMIN role!";
+        return "This page is secured & will loaded for ADMIN role!";
     }
 }
