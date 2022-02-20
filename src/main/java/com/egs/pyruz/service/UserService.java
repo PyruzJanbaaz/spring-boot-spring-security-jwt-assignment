@@ -8,6 +8,7 @@ import com.egs.pyruz.models.domain.UserUpdateRequest;
 import com.egs.pyruz.models.dto.JwtDTO;
 import com.egs.pyruz.models.dto.MessageDTO;
 import com.egs.pyruz.models.dto.ServiceExceptionDTO;
+import com.egs.pyruz.models.entity.RefreshToken;
 import com.egs.pyruz.models.entity.Role;
 import com.egs.pyruz.models.entity.User;
 import com.egs.pyruz.models.enums.ERole;
@@ -15,7 +16,6 @@ import com.egs.pyruz.repository.RoleRepository;
 import com.egs.pyruz.repository.UserRepository;
 import com.egs.pyruz.security.JwtUtils;
 import com.egs.pyruz.security.UserDetailsImpl;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,22 +30,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService extends BaseService {
 
-    final ApplicationProperties applicationProperties;
     final AuthenticationManager authenticationManager;
-    final UserRepository userRepository;
     final RoleRepository roleRepository;
+    final RefreshTokenService refreshTokenService;
     final PasswordEncoder encoder;
-    final JwtUtils jwtUtils;
 
-    public UserService(ApplicationProperties applicationProperties, AuthenticationManager authenticationManager, UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
-        this.applicationProperties = applicationProperties;
+    public UserService(JwtUtils jwtUtils, UserRepository userRepository, ApplicationProperties applicationProperties, AuthenticationManager authenticationManager, RoleRepository roleRepository, RefreshTokenService refreshTokenService, PasswordEncoder encoder) {
+        super(jwtUtils, userRepository, applicationProperties);
         this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.refreshTokenService = refreshTokenService;
         this.encoder = encoder;
-        this.jwtUtils = jwtUtils;
     }
 
     public JwtDTO authenticateUser(LoginRequest loginRequest) {
@@ -56,11 +53,15 @@ public class UserService {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
-        return new JwtDTO(jwt,
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        return new JwtDTO(
+                jwt,
+                refreshToken.getToken(),
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                roles);
+                roles
+        );
     }
 
     public MessageDTO registerUser(RegisterUserRequest registerUserRequest) {
@@ -163,26 +164,5 @@ public class UserService {
         }
     }
 
-    private User getUserEntity(HttpServletRequest request) {
-        String username = jwtUtils.getUserNameFromJwtToken(jwtUtils.parseJwt(request));
-        return getCurrentUserByUsername(username);
-    }
 
-    private User getCurrentUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(
-                () -> new ServiceExceptionDTO(
-                        applicationProperties.getProperty("application.message.user.dose.not.exist"),
-                        HttpStatus.NOT_FOUND
-                )
-        );
-    }
-
-    private User getCurrentUserByUsername(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new ServiceExceptionDTO(
-                        applicationProperties.getProperty("application.message.user.dose.not.exist"),
-                        HttpStatus.NOT_FOUND
-                )
-        );
-    }
 }

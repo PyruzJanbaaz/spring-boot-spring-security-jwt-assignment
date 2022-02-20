@@ -28,7 +28,7 @@ public class User {
   private String firstName;
 
   @Size(max = 50)
-  private String LastName;
+  private String lastName;
 
   @NotBlank
   @Size(max = 50)
@@ -42,7 +42,7 @@ public class User {
   @Size(max = 80)
   private String apiKey;
 
-  private Timestamp createDate =  new Timestamp(System.currentTimeMillis());
+  private final Timestamp createDate =  new Timestamp(System.currentTimeMillis());
 
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(  name = "user_roles", 
@@ -117,11 +117,11 @@ public class User {
   }
 
   public String getLastName() {
-    return LastName;
+    return lastName;
   }
 
   public void setLastName(String lastName) {
-    LastName = lastName;
+    this.lastName = lastName;
   }
 
   public Timestamp getCreateDate() {

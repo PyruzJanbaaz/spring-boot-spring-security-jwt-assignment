@@ -1,12 +1,10 @@
 package com.egs.pyruz.controllers;
 
-import com.egs.pyruz.models.domain.LoginRequest;
-import com.egs.pyruz.models.domain.RegisterUserRequest;
-import com.egs.pyruz.models.domain.UserChangePasswordRequest;
-import com.egs.pyruz.models.domain.UserUpdateRequest;
+import com.egs.pyruz.models.domain.*;
 import com.egs.pyruz.models.dto.MessageDTO;
+import com.egs.pyruz.models.entity.RefreshToken;
+import com.egs.pyruz.service.RefreshTokenService;
 import com.egs.pyruz.service.UserService;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,14 +19,26 @@ import javax.validation.Valid;
 public class UserController {
 
     final UserService userService;
+    final RefreshTokenService refreshTokenService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RefreshTokenService refreshTokenService) {
         this.userService = userService;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/v1/login")
-    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         return new ResponseEntity(userService.authenticateUser(loginRequest), HttpStatus.OK);
+    }
+
+    @PostMapping("/v1/logout")
+    public ResponseEntity<?> logoutUser(HttpServletRequest request) {
+        return new ResponseEntity<>(refreshTokenService.deleteByUser(request), HttpStatus.OK);
+    }
+
+    @PostMapping("/v1/refreshToken")
+    public ResponseEntity<?> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
+        return new ResponseEntity<>(refreshTokenService.findByToken(request.getRefreshToken()), HttpStatus.OK);
     }
 
     @PostMapping("/v1/register")
