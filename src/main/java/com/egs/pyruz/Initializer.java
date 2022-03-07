@@ -28,13 +28,9 @@ public class Initializer implements ApplicationRunner {
     }
 
     public void run(ApplicationArguments applicationArguments) {
-
-
         if (!userService.existsByUsername("admin")) {
-
             roleRepository.save(new Role(ERole.ROLE_USER));
             roleRepository.save(new Role(ERole.ROLE_ADMIN));
-
             User user = new User(
                     "Pyruz",
                     "Janbaaz",
@@ -42,8 +38,6 @@ public class Initializer implements ApplicationRunner {
                     "admin@admin.com",
                     encoder.encode("admin")
             );
-
-
             Set<Role> roles = new HashSet<>();
             List<Role> roleList = roleRepository.findAll();
             if (!roleList.isEmpty()) {

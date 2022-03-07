@@ -56,6 +56,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/v1/register",
                         "/api/v1/refreshToken",
                         "/api/v1/user/findById",
+                        "/api/v1/users/page",
                         "/api/v1/users").permitAll()
                 .anyRequest().authenticated();
 

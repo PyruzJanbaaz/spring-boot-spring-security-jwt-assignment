@@ -17,6 +17,9 @@ import com.egs.pyruz.repository.RoleRepository;
 import com.egs.pyruz.repository.UserRepository;
 import com.egs.pyruz.security.JwtUtils;
 import com.egs.pyruz.security.UserDetailsImpl;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -131,6 +134,11 @@ public class UserService extends BaseService {
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
+    }
+
+    public Page<User> getAllUsers(Integer pageNo,Integer pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        return userRepository.findAll(pageable);
     }
 
     public User getUserById(Long id) {

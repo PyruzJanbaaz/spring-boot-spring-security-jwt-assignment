@@ -51,6 +51,11 @@ public class UserController {
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
+    @GetMapping("/v1/users/page")
+    public ResponseEntity<?> getUserByPage(@RequestParam Integer pageNumber, @RequestParam Integer pageSize) {
+        return new ResponseEntity<>(userService.getAllUsers(pageNumber, pageSize), HttpStatus.OK);
+    }
+
     @GetMapping("/v1/user/findById")
     public ResponseEntity<?> getUserById(@RequestParam Long id) {
         return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
